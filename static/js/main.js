@@ -145,13 +145,33 @@ const Info = {
 </div>`,
 }
 
+const ResizeBar = {
+    props: ['resizing'],
+    template: `<button class="resizebar" :class="{ resizing }" @mousedown="resizeStart">〈〉</button>`,
+    methods: {
+	resizeStart: function() {
+	    this.$emit('resizeStart');
+	},
+    },
+}
+
 const Gallery = {
+    data: function() {
+	return {
+	    pane_width: this.album.settings.img_size[0],
+	    toggled_meta: true,
+	    resizing: false,
+	    resized: false,
+	};
+    },
     props: ['album', 'current', 'ord'],
-    template: `<div id="gallery">
- <div id="pic-pane" :style="{ 'flex-basis': album.settings.img_size[0] + 'px' }">
+    template: `<div id="gallery" :style="columns" @mouseup="resizeEnd" @mousemove="resize">
+ <div id="pic-pane">
   <sigal-picture :media="current" :ord="ord" :prev="prev" :next="next"></sigal-picture>
   <sigal-thumbs :media="album.media" :current="ord"></sigal-thumbs>
- </div><div id="meta-pane">
+ </div>
+ <sigal-resizebar :resizing="resizing" @resizeStart="resizeStart"></sigal-resizebar>
+ <div id="meta-pane">
   <sigal-info :media="current"></sigal-info>
   <sigal-map v-if="album.settings.show_map" :album="album" :current="current" :ord="ord"></sigal-map>
  </div>
@@ -159,10 +179,18 @@ const Gallery = {
     components: {
 	'sigal-picture': Picture,
 	'sigal-thumbs': Thumbnails,
+	'sigal-resizebar': ResizeBar,
 	'sigal-info': Info,
 	'sigal-map': Map,
     },
     computed: {
+	columns: function() {
+	    return {
+		'grid-template-columns': this.toggled_meta
+		    ? this.pane_width + 'px 20px auto'
+		    : 'auto 20px 0',
+	    }
+	},
 	prev: function() { return this.ord == 0 ? null : this.ord - 1 },
 	next: function() { return this.ord == this.album.media.length - 1 ? null : this.ord + 1 },
     },
@@ -174,6 +202,29 @@ const Gallery = {
 	if (this.next) {
 	    (new Image(1,1)).src = this.album.media[this.next].url;
 	}
+    },
+    methods: {
+	resizeStart: function() {
+	    this.resizing = true;
+	},
+	resizeEnd: function() {
+	    if (this.resizing && !this.resized)
+		this.toggled_meta = !this.toggled_meta;
+	    this.resized = this.resizing = false;
+	},
+	resize: function(e) {
+	    if (this.resizing) {
+		this.pane_width = e.clientX - 10;
+		this.resized = true;
+		this.toggled_meta = true;
+
+		if (document.body.clientWidth - this.pane_width < 50) {
+		    this.toggled_meta = false;
+		    this.resized = this.resizing = false;
+		    this.pane_width = this.album.settings.img_size[0];
+		}
+	    }
+	},
     },
 }
 

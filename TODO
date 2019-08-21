@@ -1,5 +1,4 @@
-- Figure out videos?
-- make map pane fixed and resizable
+- Figure out videos
 - handle keyboard events
 - handle gestures
 - Use ESM for leaflet

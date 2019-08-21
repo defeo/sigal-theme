@@ -17,8 +17,7 @@ html, body, #album-view, #gallery {
 /************** Main grid **************/
 
 #gallery {
-    display: flex;
-    flex-flow: row nowrap;
+    display: grid;
 }
 
 #pic-pane, #meta-pane {
@@ -27,16 +26,27 @@ html, body, #album-view, #gallery {
 }
 #pic-pane {
     position: relative;
-    flex-shrink: 1;
-    flex-grow: 1;
-}
-#meta-pane {
-    flex-shrink: 0;
-    flex-grow: 1;
-    display: flex;
-    flex-flow: column nowrap;
 }
 
+.resizebar {
+    display: block;
+    cursor: col-resize;
+    background-color: black;
+    color: white;
+    border: none;
+    opacity: 0.7;
+    width: 100%;
+    font-size: 20px;
+}
+.resizebar:hover, .resizebar.resizing {
+    opacity: 1;
+    background-color: rgba(255,255,255,0.5);
+}
+
+#meta-pane {
+    display: grid;
+    grid-template-rows: auto minmax(50%, 100%);
+}
 /************** The picture **************/
 
 .picture, .picture div {
@@ -111,9 +121,6 @@ html, body, #album-view, #gallery {
 
 /************** Info pane **************/
 .info {
-    flex-grow: 0;
-    flex-shrink: 1;
-    max-height: 50%;
     color: #eee;
     padding: 4px;
     overflow: auto;
@@ -130,11 +137,6 @@ html, body, #album-view, #gallery {
 }
 .info ul {
     padding-left: 1em;
-}
-
-/************** Map pane **************/
-.map {
-    flex: 1 0 50%;
 }
 
 /************** Transitions **************/
