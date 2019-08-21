@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block extra_head %}
+{% if settings.make_thumbs %}
+{% for media in album.medias %}
+<link rel="preload" as="image" href="{{ media.thumbnail }}">
+{% endfor %}
+{% endif %}
+{% for media in album.medias %}
+<link rel="preload" as="{{ media.type }}" href="{{ media.url }}"
+      {% if media.mime %} type="{{ media.mime }}" {% endif %}>
+{% endfor %}
+{% endblock %}
+
+{% block metadata %}
+<script id="album" type="application/json">
+  {
+      "title": {{ index_title | tojson }},
+      "description": {{ album.description | tojson }},
+      "zip": {{ album.zip | tojson }},
+      "settings": {{ settings | tojson }},
+      "media": [
+	  {% for media in album.medias %}
+	  {
+	      "type": {{ media.type | tojson }},
+	      {% if media.exif %}
+	      "exif": {
+		  "iso": {{ media.exif.iso | default(None) | tojson }},
+		  "focal": {{ media.exif.focal | default(None) | tojson }},
+		  "exposure": {{ media.exif.exposure | default(None) | tojson }},
+		  "fstop": {{ media.exif.fstop | default(None) | tojson }},
+		  "datetime": {{ media.exif.dateobj.isoformat() | tojson }},
+		  "gps":  {{ media.exif.gps | default(None) | tojson }},
+		  "Make":  {{ media.exif.make | default(None) | tojson }},
+		  "Model":  {{ media.exif.model | default(None) | tojson }}
+	      },
+	      {% endif %}
+	      "mime": {{ media.mime | default(None) | tojson }},
+	      "url": {{ media.url | tojson }},
+	      {% if settings.make_thumbs %}
+	      "thumbnail": {{ media.thumbnail | tojson }},
+	      {% endif %}
+	      "big_url": {{ media.big_url | tojson }},
+	      "size": {{ media.size | default(None) | tojson }}
+	  }{% if not loop.last %},{% endif %}
+	  {% endfor %}
+      ]
+  }
+</script>
+{% endblock %}

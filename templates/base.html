@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="{{ settings.html_language }}">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+
+    <title>{{ album.title }}</title>
+    <meta name="description" content="{{ album.description }}">
+    <meta name="author" content="{{ album.author }}">
+    <meta name="viewport" content="width=device-width">
+    <link rel="stylesheet" href="{{ theme.url }}/css/style.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.5.1/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.5.1/dist/leaflet.js"></script>
+    <script src="{{ theme.url }}/js/leaflet-providers.js"></script>
+    
+    <script src="{{ theme.url }}/js/main.js" type="module"></script>
+    <link rel="preload" href="{{ theme.url }}/js/vue.esm.browser.js" as="script">
+    <link rel="preload" href="{{ theme.url }}/js/vue-router.esm.browser.js" as="script">
+    
+    {% block extra_head %}{% endblock extra_head %}
+    <!-- include 'analytics.html' -->
+    <!-- include 'piwik.html' -->
+  </head>
+  <body>
+    <!-- include 'gtm.html' -->
+    <div id="album-view">
+      <router-view></router-view>
+    </div>
+
+    {% block metadata %}{% endblock %}
+  </body>
+</html>
