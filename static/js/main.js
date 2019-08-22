@@ -10,7 +10,7 @@ const Picture = {
  <router-link class="nav right" tag="button" v-show="next !== null" :to="{ name: 'view', params: { ord: next } }">〉</router-link>
  <transition name="slide">
   <img class="view" v-if="media.type == 'image'" :src="media.url" :alt="media.title" :key="ord">
-  <video class="view" v-else-if="media.type == 'video'" :src="media.url" :type="media.mime" :key="ord"></video>
+  <video class="view" v-else-if="media.type == 'video'" :src="media.url" :type="media.mime" controls :key="ord"></video>
   <a class="view" v-else :href="media.url" download="true" :key="ord">↓</a>
  </transition>
 </div></div>`,
@@ -76,7 +76,7 @@ const Map = {
     mounted: function() {
 	// todo, determine center when none is given
 	this.$map = L.map(this.$el, {
-	    center: this.current.exif.gps,
+	    center: this.current.exif && this.current.exif.gps || [0,0],
 	    zoom: 13,
 	});
 	L.tileLayer.provider(this.album.settings.leaflet_provider).addTo(this.$map);
@@ -132,10 +132,11 @@ const Info = {
     props: ['media'],
     template: `<div class="info">
  <a :href="media.big_url || media.url" title="Download original" download>&#128190;</a>
- <h3 v-if="media.exif.datetime">{{ new Date(media.exif.datetime).toLocaleString() }}</h3>
+ <h3 v-if="media.exif && media.exif.datetime">{{ new Date(media.exif.datetime).toLocaleString() }}</h3>
+ <h3 v-else>{{ media.title || media.url }}</h3>
  <p v-if="media.description">{{ media.description }}</h3>
  <p v-if="media.exif">Camera info</p>
- <ul>
+ <ul v-if="media.exif">
   <li v-if="media.exif.Make || media.exif.Model">{{ media.exif.Make }} {{ media.exif.Model }}</li>
   <li v-if="media.exif.iso">ISO sensitivity: {{ media.exif.iso }}</li>
   <li v-if="media.exif.exposure">Shutter speed: {{ media.exif.exposure }}</li>
@@ -194,16 +195,20 @@ const Gallery = {
 	prev: function() { return this.ord == 0 ? null : this.ord - 1 },
 	next: function() { return this.ord == this.album.media.length - 1 ? null : this.ord + 1 },
     },
+    mounted: function() {
+	this.preload(this.prev);
+	this.preload(this.next);
+    },
     updated: function () {
-	// Poor man's preloading
-	if (this.prev) {
-	    (new Image(1,1)).src = this.album.media[this.prev].url;
-	}
-	if (this.next) {
-	    (new Image(1,1)).src = this.album.media[this.next].url;
-	}
+	this.preload(this.prev);
+	this.preload(this.next);
     },
     methods: {
+	preload: function(ord) {
+	    // Poor man's preloading
+	    if(ord)
+		new Image(1,1).src = (this.album.media[ord].url);
+	},
 	resizeStart: function() {
 	    this.resizing = true;
 	},
